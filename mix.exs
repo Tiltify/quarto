@@ -6,7 +6,7 @@ defmodule Quarto.MixProject do
     [
       app: :quarto,
       version: "1.1.7",
-      elixir: "~> 1.10",
+      elixir: "~> 1.20.4",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -43,12 +43,12 @@ defmodule Quarto.MixProject do
   defp deps do
     [
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:ecto_sql, "~> 3.4"},
+      {:ecto_sql, "~> 3.14.0"},
       {:postgrex, "~> 0.14", only: :test},
       {:ex_doc, "~> 0.21", only: [:dev, :test]},
-      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
       {:stream_data, "~> 0.5", only: [:dev, :test]},
-      {:plug_crypto, "~> 1.1.2 or ~> 1.2"}
+      {:plug_crypto, "~> 2.2.1"}
     ]
   end
 end
