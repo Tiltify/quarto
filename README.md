@@ -38,6 +38,19 @@ You can add `Quarto` to your `Ecto.Repo`.
 
 It adds the `paginate/3` function to your repository which you can use to paginate through a resultset. See `Quarto.paginate/4` on the options that can be passed to `use Quarto`.
 
+### Cursor secret
+
+The default cursor codec (`Quarto.Cursor.Base64`) signs every cursor and verifies the signature before
+deserializing a cursor sent back by a client. Configure a secret of at least 32 bytes:
+
+```elixir
+# config/runtime.exs
+config :quarto, cursor_secret: System.fetch_env!("QUARTO_CURSOR_SECRET")
+```
+
+Encoding or decoding a cursor raises if the secret is missing. Changing the secret invalidates all
+previously issued cursors.
+
 To paginate you can query an Ecto schema like you normally would. It is important that the columns you order by are deterministically ordered. If there are null values in the columns or if two rows have the same values in the columns you order by the results may be wrong. To fix this you can always add an extra unique column to order by.
 
 The columns you order by will also be used to construct the opaque cursor that can be used to retrieve the next set of results.
@@ -113,7 +126,7 @@ Quarto.Post
 
 #### Implementing a custom cursor
 
-A default cursor implementation is provided but you can provide a custom implementation. E.g. to sign the cursors. The codec needs to implement the
+A default, signed cursor implementation is provided but you can provide a custom implementation. The codec needs to implement the
 `Quarto.Cursor` behaviour. See `Quarto.Cursor.Base64` for an example
 
 #### Encoding/decoding cursor values

@@ -86,8 +86,8 @@ defmodule Quarto do
       [1, "A profile"]
       iex> cursor = Quarto.cursor_for_entry(%Post{id: 2, user: %User{id: 1, profile: %Profile{title: "A profile"}}}, {:user, {:profile, :title}})
       ["A profile"]
-      iex> Quarto.Cursor.Base64.encode!(cursor)
-      "g2wAAAABbQAAAAlBIHByb2ZpbGVq"
+      iex> cursor |> Quarto.Cursor.Base64.encode!() |> Quarto.Cursor.Base64.decode!()
+      ["A profile"]
 
       iex> queryable = Post |> order_by({:desc, :position})
       iex> Quarto.cursor_for_entry(%Post{id: 2, position: 3}, queryable)
@@ -100,8 +100,8 @@ defmodule Quarto do
       ...> |> order_by({:desc, :position})
       iex> cursor = Quarto.cursor_for_entry(%Post{id: 2, position: 3, user: %User{name: "A. Hamilton"}}, queryable)
       ["A. Hamilton", 3]
-      iex> Quarto.Cursor.Base64.encode!(cursor)
-      "g2wAAAACbQAAAAtBLiBIYW1pbHRvbmEDag=="
+      iex> cursor |> Quarto.Cursor.Base64.encode!() |> Quarto.Cursor.Base64.decode!()
+      ["A. Hamilton", 3]
   """
   def cursor_for_entry(entry, queryable, opts \\ [])
 

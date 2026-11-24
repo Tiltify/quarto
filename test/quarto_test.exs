@@ -446,7 +446,7 @@ defmodule QuartoTest do
       |> :erlang.term_to_binary()
       |> Base.url_encode64()
 
-    assert_raise(ArgumentError, ~r/^cannot deserialize.+/, fn ->
+    assert_raise(ArgumentError, ~r/^error decoding cursor \(invalid_signature\)/, fn ->
       Post
       |> order_by(asc: :position)
       |> Quarto.paginate(
@@ -458,6 +458,49 @@ defmodule QuartoTest do
         TestRepo
       )
     end)
+
+    refute_receive :rce, 1000, "Remote Code Execution Detected"
+  end
+
+  defmodule GadgetStruct do
+    defstruct pid: nil
+
+    defimpl Enumerable do
+      def reduce(%{pid: pid}, acc, _fun) do
+        send(pid, :rce)
+        {:done, elem(acc, 1)}
+      end
+
+      def count(_), do: {:error, __MODULE__}
+      def member?(_, _), do: {:error, __MODULE__}
+      def slice(_), do: {:error, __MODULE__}
+    end
+
+    defimpl Inspect do
+      def inspect(%{pid: pid}, _opts) do
+        send(pid, :rce)
+        "#GadgetStruct<>"
+      end
+    end
+  end
+
+  test "unsigned struct payloads are refused before any protocol dispatch" do
+    for term <- [
+          %GadgetStruct{pid: self()},
+          [%GadgetStruct{pid: self()}],
+          [{:ok, %GadgetStruct{pid: self()}}]
+        ] do
+      payload =
+        term
+        |> :erlang.term_to_binary()
+        |> Base.url_encode64()
+
+      assert_raise(ArgumentError, ~r/^error decoding cursor \(invalid_signature\)/, fn ->
+        Post
+        |> order_by(asc: :position)
+        |> Quarto.paginate([after: payload, limit: 8], TestRepo)
+      end)
+    end
 
     refute_receive :rce, 1000, "Remote Code Execution Detected"
   end
