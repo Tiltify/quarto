@@ -5,7 +5,7 @@ defmodule Quarto.MixProject do
   def project do
     [
       app: :quarto,
-      version: "1.1.7",
+      version: "1.1.8",
       elixir: "~> 1.20.4",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
